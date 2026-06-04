@@ -170,6 +170,12 @@
                                 <i class="ri-git-repository-private-line text-sm"></i>
                                 Peran & Hak Akses
                             </button>
+
+                            <button x-show="hasAccess('user_manage')" @click="activeTab = 'whatsapp'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-white/10"
+                                :class="activeTab === 'whatsapp' ? 'bg-brand-green text-white shadow-md shadow-brand-green/20' : 'text-slate-300 hover:text-white'">
+                                <i class="ri-whatsapp-line text-sm"></i>
+                                Integrasi WhatsApp
+                            </button>
                         </div>
                     </template>
 
@@ -1527,7 +1533,89 @@
                 </div>
 
                 <!-- ========================================== -->
-                <!-- MODULE 18: PROFILE & PASSWORD              -->
+                <!-- MODULE 18: WHATSAPP FONNTE GATEWAY INTEGRATION -->
+                <!-- ========================================== -->
+                <div x-show="activeTab === 'whatsapp'" class="space-y-6">
+                    <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-base font-extrabold text-brand-navy tracking-tight">Koneksi WhatsApp Gateway (Fonnte API)</h3>
+                                <p class="text-xs text-slate-400">Hubungkan sistem kepondokan dengan nomor Whatsapp dinas menggunakan layanan Fonnte untuk notifikasi otomatis.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-500">Status Gateway:</span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold flex items-center gap-1.5"
+                                    :class="whatsappConnected ? 'bg-emerald-50 text-brand-green border border-brand-green/20' : 'bg-rose-50 text-rose-600 border border-rose-200'">
+                                    <span class="h-1.5 w-1.5 rounded-full" :class="whatsappConnected ? 'bg-brand-green animate-pulse' : 'bg-rose-500'"></span>
+                                    <span x-text="whatsappConnected ? 'Terhubung (Active)' : 'Terputus (Offline)'"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <!-- Left panel: API configuration -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">Pengaturan Token API</h4>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Fonnte API Token / App Key</label>
+                                        <div class="relative rounded-xl shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="ri-key-2-line"></i>
+                                            </div>
+                                            <input type="password" x-model="whatsappToken" placeholder="Masukkan token fonnte..." class="block w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2.5 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <p class="text-[9px] text-slate-400 mt-1">Dapatkan token API Anda dari dashboard fonnte.com</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor HP Pengirim (Device)</label>
+                                        <input type="text" x-model="whatsappSender" placeholder="Contoh: 081234567890" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
+                                    </div>
+
+                                    <div class="pt-2 flex gap-3">
+                                        <button @click="testWhatsappConnection()" class="rounded-xl border border-slate-200 bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-600 transition-all flex items-center gap-1.5">
+                                            <i class="ri-refresh-line"></i>
+                                            Simulasikan Toggle Koneksi
+                                        </button>
+                                        <button @click="triggerToast('success', 'Pengaturan token Fonnte berhasil disimpan ke konfigurasi.')" class="rounded-xl bg-brand-navy text-white hover:bg-brand-navy-dark px-4 py-2.5 text-xs font-bold transition-all shadow-md">
+                                            Simpan Token
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right panel: send test message -->
+                            <div class="space-y-4">
+                                <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">Uji Coba Kirim Pesan</h4>
+                                
+                                <form @submit="sendTestWhatsappMessage(event)" class="space-y-3">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nomor HP Penerima (Tujuan)</label>
+                                        <div class="relative rounded-xl shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i class="ri-whatsapp-line"></i>
+                                            </div>
+                                            <input type="text" id="wa_test_phone" required placeholder="Contoh: 0812XXXXXXXX" class="block w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2.5 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Isi Pesan Uji Coba</label>
+                                        <textarea id="wa_test_message" required placeholder="Tulis pesan uji coba di sini..." rows="3" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none"></textarea>
+                                    </div>
+                                    <button type="submit" class="rounded-xl bg-brand-green text-white hover:bg-brand-green-dark px-4 py-2.5 text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                                        <i class="ri-send-plane-line"></i>
+                                        Kirim Pesan WA
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- MODULE 19: PROFILE & PASSWORD              -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'profile'" class="space-y-6">
                     <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
@@ -1817,6 +1905,11 @@
                 showCardModal: false,
                 selectedRoleForEdit: 'teacher',
 
+                // WhatsApp Integration State (Fonnte API)
+                whatsappToken: 'FONNTE_API_TOKEN_MOCK_123456789',
+                whatsappSender: '081234567890',
+                whatsappConnected: true,
+
                 // Global Toast Alerts
                 toast: {
                     visible: false,
@@ -2070,7 +2163,8 @@
                         visits: 'Register Kunjungan Wali',
                         announcements: 'Papan Pengumuman',
                         reports: 'Laporan Eksekutif',
-                        profile: 'Akun Kredensial Saya'
+                        profile: 'Akun Kredensial Saya',
+                        whatsapp: 'Integrasi WhatsApp Fonnte'
                     };
                     return titles[this.activeTab] || 'Sistem Informasi';
                 },
@@ -2461,6 +2555,38 @@
                 handlePassChange(e) {
                     e.preventDefault();
                     this.triggerToast('success', 'Sandi berhasil diperbarui.');
+                    e.target.reset();
+                },
+
+                testWhatsappConnection() {
+                    if (!this.whatsappToken) {
+                        this.triggerToast('warning', 'Koneksi gagal! Silakan masukkan Fonnte API Token terlebih dahulu.');
+                        this.whatsappConnected = false;
+                        return;
+                    }
+                    this.whatsappConnected = !this.whatsappConnected;
+                    if (this.whatsappConnected) {
+                        this.triggerToast('success', 'Koneksi Fonnte API Terhubung! Status device: ACTIVE.');
+                    } else {
+                        this.triggerToast('warning', 'Koneksi Terputus! Device dinonaktifkan.');
+                    }
+                },
+
+                sendTestWhatsappMessage(e) {
+                    e.preventDefault();
+                    const phone = document.getElementById('wa_test_phone').value;
+                    const message = document.getElementById('wa_test_message').value;
+
+                    if (!this.whatsappToken) {
+                        this.triggerToast('warning', 'Gagal mengirim! Fonnte API Token kosong.');
+                        return;
+                    }
+                    if (!this.whatsappConnected) {
+                        this.triggerToast('warning', 'Gagal mengirim! Device WhatsApp berstatus TERPUTUS.');
+                        return;
+                    }
+
+                    this.triggerToast('success', 'Pesan uji coba sukses dikirim ke ' + phone + ' via Fonnte Gateway API!');
                     e.target.reset();
                 },
 
