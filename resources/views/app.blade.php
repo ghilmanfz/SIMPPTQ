@@ -1658,11 +1658,17 @@
                                             <input type="text" x-model="logoText" placeholder="Contoh: NI" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
                                         </div>
                                         <div x-show="logoType === 'image'">
-                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Simulasikan Upload Logo Gambar</label>
-                                            <select x-model="logoImage" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
-                                                <option value="">Default Favicon Logo</option>
-                                                <option value="/pondok_hero_banner.png">Gunakan Banner Pesantren (Mock Logo)</option>
-                                            </select>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Upload Logo Gambar</label>
+                                            <div class="flex items-center gap-2">
+                                                <label class="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-300 cursor-pointer transition-colors text-xs font-bold">
+                                                    <i class="ri-upload-2-line"></i> Pilih File Logo
+                                                    <input type="file" @change="uploadLogoFile($event)" accept="image/*" class="hidden">
+                                                </label>
+                                                <button type="button" @click="logoImage = ''" class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-xl text-xs font-bold transition-colors" x-show="logoImage">
+                                                    <i class="ri-delete-bin-line"></i> Hapus
+                                                </button>
+                                            </div>
+                                            <span class="text-[9px] text-slate-400 mt-1 block">Rekomendasi: Format PNG/JPG transparan, ukuran &lt; 500KB.</span>
                                         </div>
                                     </div>
 
@@ -1700,7 +1706,7 @@
 
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Gambar Hero Banner</label>
-                                        <div class="grid grid-cols-2 gap-3">
+                                        <div class="grid grid-cols-2 gap-3 mb-3">
                                             <button @click="landingHeroImage = 'default'" class="py-2.5 rounded-xl text-xs font-bold border transition-all"
                                                 :class="landingHeroImage === 'default' ? 'bg-brand-navy text-white border-brand-navy' : 'bg-slate-50 text-slate-600 border-slate-200'">
                                                 Default Glassmorphic Card
@@ -1709,6 +1715,20 @@
                                                 :class="landingHeroImage === 'custom' ? 'bg-brand-navy text-white border-brand-navy' : 'bg-slate-50 text-slate-600 border-slate-200'">
                                                 Gambar Kustom (Desain Vektor)
                                             </button>
+                                        </div>
+
+                                        <div x-show="landingHeroImage === 'custom'" class="space-y-2 border border-slate-200 bg-slate-50 p-3.5 rounded-2xl">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Upload Gambar Hero Custom</label>
+                                            <div class="flex items-center gap-2">
+                                                <label class="flex items-center gap-2 px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-xl border border-slate-300 cursor-pointer transition-colors text-xs font-bold shadow-sm">
+                                                    <i class="ri-image-add-line"></i> Pilih Gambar Hero
+                                                    <input type="file" @change="uploadHeroFile($event)" accept="image/*" class="hidden">
+                                                </label>
+                                                <button type="button" @click="landingHeroImageCustom = '/pondok_hero_banner.png'" class="px-3 py-2 text-slate-500 hover:bg-slate-200 rounded-xl text-xs font-bold transition-colors" x-show="landingHeroImageCustom && landingHeroImageCustom !== '/pondok_hero_banner.png'">
+                                                    Reset ke Default
+                                                </button>
+                                            </div>
+                                            <span class="text-[9px] text-slate-400 block">Rekomendasi: Dimensi landscape (16:9), ukuran &lt; 1.5MB.</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1784,7 +1804,7 @@
                                                 <span class="text-[9px] block">Default Glassmorphic Card Active</span>
                                             </div>
                                             <div x-show="landingHeroImage === 'custom'" class="w-full h-24 overflow-hidden rounded-lg flex items-center justify-center">
-                                                <img src="/pondok_hero_banner.png" class="h-full w-full object-cover">
+                                                <img :src="landingHeroImageCustom || '/pondok_hero_banner.png'" class="h-full w-full object-cover">
                                             </div>
                                         </div>
                                     </div>
@@ -2100,6 +2120,7 @@
                 landingTitleHighlight: localStorage.getItem('simpptq_landing_hero_title_highlight') || 'Qur\'ani & Unggul',
                 landingDesc: localStorage.getItem('simpptq_landing_hero_desc') || 'Selamat datang di Sistem Informasi Manajemen Terpusat PPTQ Nurul Iman. Solusi digital modern untuk mengelola data personil, kehadiran GPS, perkembangan santri, penggajian, dan operasional kepondokan secara real-time.',
                 landingHeroImage: localStorage.getItem('simpptq_landing_hero_image') || 'default',
+                landingHeroImageCustom: localStorage.getItem('simpptq_landing_hero_image_custom') || '/pondok_hero_banner.png',
                 statsPersonnel: localStorage.getItem('simpptq_landing_stats_personnel') || '40+',
                 statsSantri: localStorage.getItem('simpptq_landing_stats_santri') || '350+',
                 statsHalaqah: localStorage.getItem('simpptq_landing_stats_halaqah') || '15+',
@@ -2796,11 +2817,48 @@
                     localStorage.setItem('simpptq_landing_hero_title_highlight', this.landingTitleHighlight);
                     localStorage.setItem('simpptq_landing_hero_desc', this.landingDesc);
                     localStorage.setItem('simpptq_landing_hero_image', this.landingHeroImage);
+                    localStorage.setItem('simpptq_landing_hero_image_custom', this.landingHeroImageCustom);
                     localStorage.setItem('simpptq_landing_stats_personnel', this.statsPersonnel);
                     localStorage.setItem('simpptq_landing_stats_santri', this.statsSantri);
                     localStorage.setItem('simpptq_landing_stats_halaqah', this.statsHalaqah);
                     localStorage.setItem('simpptq_landing_stats_accuracy', this.statsAccuracy);
                     this.triggerToast('success', 'Pengaturan branding & landing page berhasil disimpan dan dipublikasikan!');
+                },
+
+                uploadLogoFile(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    if (file.size > 500 * 1024) {
+                        this.triggerToast('warning', 'Gagal: Ukuran logo tidak boleh melebihi 500 KB!');
+                        event.target.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.logoImage = e.target.result;
+                        this.triggerToast('success', 'Logo berhasil diunggah secara lokal (belum disimpan). Silakan klik "Simpan & Publikasikan".');
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                uploadHeroFile(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+                    
+                    if (file.size > 1.5 * 1024 * 1024) {
+                        this.triggerToast('warning', 'Gagal: Ukuran banner hero tidak boleh melebihi 1.5 MB!');
+                        event.target.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.landingHeroImageCustom = e.target.result;
+                        this.triggerToast('success', 'Gambar banner hero berhasil diunggah secara lokal (belum disimpan). Silakan klik "Simpan & Publikasikan".');
+                    };
+                    reader.readAsDataURL(file);
                 },
 
                 // ----------------------------------------------------
