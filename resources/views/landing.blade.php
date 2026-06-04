@@ -8,20 +8,25 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <!-- Alpine JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-slate-50 text-slate-800">
+<body class="font-sans antialiased bg-slate-50 text-slate-800" x-data="landingPageData()">
 
     <!-- Top Header / Navigation -->
     <header class="sticky top-0 z-50 w-full border-b border-slate-100 bg-white/80 backdrop-blur-md">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <!-- Brand Logo -->
             <a href="/" class="flex items-center gap-3 group">
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy-dark text-white font-bold text-lg shadow-md shadow-brand-navy/10 transition-transform group-hover:scale-105">
-                    NI
+                <!-- Text logo -->
+                <div x-show="logoType === 'text'" class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy-dark text-white font-bold text-lg shadow-md shadow-brand-navy/10 transition-transform group-hover:scale-105" x-text="logoText"></div>
+                <!-- Image logo -->
+                <div x-show="logoType === 'image'" class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center bg-slate-100 border shadow-sm">
+                    <img :src="logoImage || '/favicon.ico'" class="h-full w-full object-cover">
                 </div>
                 <div>
-                    <span class="text-xl font-bold tracking-tight text-brand-navy block leading-none">PPTQ Nurul Iman</span>
-                    <span class="text-[10px] font-medium uppercase tracking-wider text-brand-green">Sistem Manajemen Terpadu</span>
+                    <span class="text-xl font-bold tracking-tight text-brand-navy block leading-none" x-text="pondokName"></span>
+                    <span class="text-[10px] font-medium uppercase tracking-wider text-brand-green" x-text="pondokTagline"></span>
                 </div>
             </a>
 
@@ -59,13 +64,11 @@
                     </div>
 
                     <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl leading-[1.1] text-white">
-                        Membangun Generasi <br/>
-                        <span class="bg-gradient-to-r from-brand-sky via-teal-200 to-brand-green bg-clip-text text-transparent">Qur'ani & Unggul</span>
+                        <span x-text="landingTitle"></span> <br/>
+                        <span class="bg-gradient-to-r from-brand-sky via-teal-200 to-brand-green bg-clip-text text-transparent" x-text="landingTitleHighlight"></span>
                     </h1>
 
-                    <p class="text-lg text-slate-300 max-w-xl leading-relaxed">
-                        Selamat datang di Sistem Informasi Manajemen Terpusat PPTQ Nurul Iman. Solusi digital modern untuk mengelola data personil, kehadiran GPS, perkembangan santri, penggajian, dan operasional kepondokan secara real-time.
-                    </p>
+                    <p class="text-lg text-slate-300 max-w-xl leading-relaxed" x-text="landingDesc"></p>
 
                     <div class="flex flex-wrap gap-4 pt-2">
                         <a href="/login" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-green px-6 py-3.5 text-base font-bold text-white shadow-lg shadow-brand-green/20 transition-all hover:bg-brand-green-dark hover:scale-[1.02]">
@@ -78,10 +81,10 @@
                     </div>
                 </div>
 
-                <!-- Hero Right Card Graphic -->
+                <!-- Hero Right Card Graphic or Custom Image -->
                 <div class="lg:col-span-5 relative flex justify-center">
-                    <!-- Premium Glassmorphism Card Frame matching Deloitte/Mayapada aesthetic -->
-                    <div class="w-full max-w-[400px] rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md relative">
+                    <!-- Default Glassmorphism Card Frame -->
+                    <div x-show="landingHeroImage === 'default'" class="w-full max-w-[400px] rounded-3xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md relative">
                         <div class="absolute -top-3 -left-3 flex h-8 w-8 items-center justify-center rounded-xl bg-brand-green text-white shadow-md">
                             <i class="ri-double-quotes-l"></i>
                         </div>
@@ -90,8 +93,8 @@
                                 <i class="ri-shield-user-line"></i>
                             </div>
                             <div>
-                                <h4 class="font-bold text-white leading-tight">PPTQ Nurul Iman</h4>
-                                <p class="text-xs text-brand-sky/70">Modern & Aman</p>
+                                <h4 class="font-bold text-white leading-tight" x-text="pondokName"></h4>
+                                <p class="text-xs text-brand-sky/70" x-text="pondokTagline"></p>
                             </div>
                         </div>
 
@@ -119,28 +122,33 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Custom Hero Image Vektor generated by Gemini -->
+                    <div x-show="landingHeroImage === 'custom'" class="w-full max-w-[440px] rounded-3xl border border-white/10 bg-white/5 p-3 shadow-2xl backdrop-blur-sm overflow-hidden flex items-center justify-center">
+                        <img src="/pondok_hero_banner.png" class="rounded-2xl w-full object-cover shadow-inner hover:scale-[1.01] transition-transform">
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Quick Statistics Segment (Deloitte/Mayapada Header Blue Style Accent) -->
+    <!-- Quick Statistics Segment (Deloitte/Mayapada Header Style Accent) -->
     <section class="relative z-20 -mt-10 mx-auto max-w-5xl px-6">
         <div class="grid grid-cols-2 gap-4 rounded-3xl bg-white p-6 shadow-xl border border-slate-100 md:grid-cols-4">
             <div class="text-center p-4 border-r border-slate-100 last:border-0">
-                <span class="block text-3xl font-extrabold text-brand-navy">40+</span>
+                <span class="block text-3xl font-extrabold text-brand-navy" x-text="statsPersonnel"></span>
                 <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Ustadz & Staff</span>
             </div>
             <div class="text-center p-4 border-r border-slate-100 md:border-r last:border-0">
-                <span class="block text-3xl font-extrabold text-brand-navy">350+</span>
+                <span class="block text-3xl font-extrabold text-brand-navy" x-text="statsSantri"></span>
                 <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Santri Binaan</span>
             </div>
             <div class="text-center p-4 border-r border-slate-100 last:border-0">
-                <span class="block text-3xl font-extrabold text-brand-navy">15+</span>
+                <span class="block text-3xl font-extrabold text-brand-navy" x-text="statsHalaqah"></span>
                 <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Halaqah Kelas</span>
             </div>
             <div class="text-center p-4 last:border-0">
-                <span class="block text-3xl font-extrabold text-brand-navy">100%</span>
+                <span class="block text-3xl font-extrabold text-brand-navy" x-text="statsAccuracy"></span>
                 <span class="text-xs font-semibold tracking-wider text-slate-500 uppercase">Data Terpusat</span>
             </div>
         </div>
@@ -352,12 +360,15 @@
                 <!-- Branding column -->
                 <div class="lg:col-span-5 space-y-6">
                     <a href="/" class="flex items-center gap-3">
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green text-white font-bold text-lg shadow-md">
-                            NI
+                        <!-- Text logo -->
+                        <div x-show="logoType === 'text'" class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-green text-white font-bold text-lg shadow-md" x-text="logoText"></div>
+                        <!-- Image logo -->
+                        <div x-show="logoType === 'image'" class="h-10 w-10 rounded-xl overflow-hidden flex items-center justify-center bg-slate-100 border">
+                            <img :src="logoImage || '/favicon.ico'" class="h-full w-full object-cover">
                         </div>
                         <div>
-                            <span class="text-xl font-bold tracking-tight text-white block leading-none">PPTQ Nurul Iman</span>
-                            <span class="text-[10px] font-medium uppercase tracking-wider text-brand-green">Tahfidzul Qur'an</span>
+                            <span class="text-xl font-bold tracking-tight text-white block leading-none" x-text="pondokName"></span>
+                            <span class="text-[10px] font-medium uppercase tracking-wider text-brand-green" x-text="pondokTagline"></span>
                         </div>
                     </a>
                     <p class="text-sm leading-relaxed text-slate-400 max-w-md">
@@ -415,5 +426,24 @@
         </div>
     </footer>
 
+    <script>
+        function landingPageData() {
+            return {
+                logoType: localStorage.getItem('simpptq_logo_type') || 'text',
+                logoText: localStorage.getItem('simpptq_logo_text') || 'NI',
+                logoImage: localStorage.getItem('simpptq_logo_image') || '',
+                pondokName: localStorage.getItem('simpptq_pondok_name') || 'PPTQ Nurul Iman',
+                pondokTagline: localStorage.getItem('simpptq_pondok_tagline') || 'Sistem Manajemen Terpadu',
+                landingTitle: localStorage.getItem('simpptq_landing_hero_title') || 'Membangun Generasi',
+                landingTitleHighlight: localStorage.getItem('simpptq_landing_hero_title_highlight') || 'Qur\'ani & Unggul',
+                landingDesc: localStorage.getItem('simpptq_landing_hero_desc') || 'Selamat datang di Sistem Informasi Manajemen Terpusat PPTQ Nurul Iman. Solusi digital modern untuk mengelola data personil, kehadiran GPS, perkembangan santri, penggajian, dan operasional kepondokan secara real-time.',
+                landingHeroImage: localStorage.getItem('simpptq_landing_hero_image') || 'default',
+                statsPersonnel: localStorage.getItem('simpptq_landing_stats_personnel') || '40+',
+                statsSantri: localStorage.getItem('simpptq_landing_stats_santri') || '350+',
+                statsHalaqah: localStorage.getItem('simpptq_landing_stats_halaqah') || '15+',
+                statsAccuracy: localStorage.getItem('simpptq_landing_stats_accuracy') || '100%'
+            };
+        }
+    </script>
 </body>
 </html>

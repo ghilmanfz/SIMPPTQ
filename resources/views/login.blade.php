@@ -8,8 +8,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <!-- Alpine JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-sans antialiased bg-slate-50 text-slate-800 h-screen flex flex-col justify-between overflow-x-hidden">
+<body class="font-sans antialiased bg-slate-50 text-slate-800 h-screen flex flex-col justify-between overflow-x-hidden" x-data="loginBrandingData()">
 
     <!-- Global Background Elements matching Deloitte/Mayapada gradient style -->
     <div class="fixed -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-brand-sky/50 blur-[140px] pointer-events-none -z-10"></div>
@@ -18,11 +20,14 @@
     <!-- Header Navigation Backlink -->
     <header class="w-full px-6 py-4 flex justify-between items-center bg-white/40 backdrop-blur-sm border-b border-slate-100">
         <a href="/" class="flex items-center gap-3">
-            <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy-dark text-white font-bold text-base shadow-sm">
-                NI
+            <!-- Text logo -->
+            <div x-show="logoType === 'text'" class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-navy to-brand-navy-dark text-white font-bold text-base shadow-sm" x-text="logoText"></div>
+            <!-- Image logo -->
+            <div x-show="logoType === 'image'" class="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center bg-slate-100 border">
+                <img :src="logoImage || '/favicon.ico'" class="h-full w-full object-cover">
             </div>
             <div>
-                <span class="text-sm font-bold text-brand-navy block leading-none">PPTQ Nurul Iman</span>
+                <span class="text-sm font-bold text-brand-navy block leading-none" x-text="pondokName"></span>
                 <span class="text-[9px] font-medium uppercase tracking-wider text-brand-green">Kembali ke Beranda</span>
             </div>
         </a>
@@ -163,12 +168,21 @@
     <!-- Footer Copyright Ribbon -->
     <footer class="w-full py-4 text-center border-t border-slate-100 bg-white/40">
         <p class="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-            &copy; 2026 PPTQ Nurul Iman. Seluruh Hak Cipta Dilindungi Undang-Undang.
+            &copy; 2026 <span x-text="pondokName"></span>. Seluruh Hak Cipta Dilindungi Undang-Undang.
         </p>
     </footer>
 
     <!-- Demo Script -->
     <script>
+        function loginBrandingData() {
+            return {
+                logoType: localStorage.getItem('simpptq_logo_type') || 'text',
+                logoText: localStorage.getItem('simpptq_logo_text') || 'NI',
+                logoImage: localStorage.getItem('simpptq_logo_image') || '',
+                pondokName: localStorage.getItem('simpptq_pondok_name') || 'PPTQ Nurul Iman',
+            };
+        }
+
         function fillAndRedirect(role) {
             const inputs = {
                 superadmin: { email: 'superadmin@nuruliman.net', pass: 'superadmin123' },
@@ -202,6 +216,5 @@
             window.location.href = '/app?role=' + role;
         }
     </script>
-
 </body>
 </html>

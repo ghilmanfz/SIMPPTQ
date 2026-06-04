@@ -28,12 +28,15 @@
             <div class="flex flex-col h-full overflow-y-auto">
                 <!-- Branding Header -->
                 <div class="px-6 py-5 border-b border-white/10 flex items-center gap-3">
-                    <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-green text-white font-bold text-base shadow-sm">
-                        NI
+                    <!-- Text logo -->
+                    <div x-show="logoType === 'text'" class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-green text-white font-bold text-base shadow-sm" x-text="logoText"></div>
+                    <!-- Image logo -->
+                    <div x-show="logoType === 'image'" class="h-9 w-9 rounded-xl overflow-hidden flex items-center justify-center bg-white/15 border border-white/10">
+                        <img :src="logoImage || '/favicon.ico'" class="h-full w-full object-cover">
                     </div>
                     <div>
-                        <span class="text-sm font-bold tracking-tight block">PPTQ Nurul Iman</span>
-                        <span class="text-[9px] font-medium tracking-wider uppercase text-brand-sky/60">Sistem Manajemen</span>
+                        <span class="text-sm font-bold tracking-tight block" x-text="pondokName"></span>
+                        <span class="text-[9px] font-medium tracking-wider uppercase text-brand-sky/60" x-text="pondokTagline"></span>
                     </div>
                 </div>
 
@@ -175,6 +178,12 @@
                                 :class="activeTab === 'whatsapp' ? 'bg-brand-green text-white shadow-md shadow-brand-green/20' : 'text-slate-300 hover:text-white'">
                                 <i class="ri-whatsapp-line text-sm"></i>
                                 Integrasi WhatsApp
+                            </button>
+
+                            <button x-show="hasAccess('user_manage')" @click="activeTab = 'branding'" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-white/10"
+                                :class="activeTab === 'branding' ? 'bg-brand-green text-white shadow-md shadow-brand-green/20' : 'text-slate-300 hover:text-white'">
+                                <i class="ri-palette-line text-sm"></i>
+                                Pengaturan Branding
                             </button>
                         </div>
                     </template>
@@ -1609,13 +1618,182 @@
                                         Kirim Pesan WA
                                     </button>
                                 </form>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- MODULE 19: LANDING PAGE & BRANDING MANAGER -->
+                <!-- ========================================== -->
+                <div x-show="activeTab === 'branding'" class="space-y-6">
+                    <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-base font-extrabold text-brand-navy tracking-tight font-sans">Pengaturan Landing Page & Logo Branding</h3>
+                                <p class="text-xs text-slate-400">Atur informasi, logo instansi, serta gambar hero banner yang akan diterapkan secara global (Landing Page, Login, dan Dashboard).</p>
+                            </div>
+                            <button @click="saveBrandingSettings()" class="rounded-xl bg-brand-green text-white font-bold text-xs px-5 py-3 shadow-md shadow-brand-green/20 hover:bg-brand-green-dark transition-all">
+                                <i class="ri-save-line"></i> Simpan & Publikasikan
+                            </button>
+                        </div>
+
+                        <div class="grid lg:grid-cols-12 gap-8">
+                            <!-- Left: Configurations Forms -->
+                            <div class="lg:col-span-7 space-y-6">
+                                <!-- Logo settings -->
+                                <div class="space-y-4">
+                                    <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">1. Konfigurasi Logo Aplikasi</h4>
+                                    
+                                    <div class="grid sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tipe Logo Utama</label>
+                                            <select x-model="logoType" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
+                                                <option value="text">Teks (Inisial)</option>
+                                                <option value="image">Gambar (Logo Instansi)</option>
+                                            </select>
+                                        </div>
+                                        <div x-show="logoType === 'text'">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Teks Inisial Logo</label>
+                                            <input type="text" x-model="logoText" placeholder="Contoh: NI" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div x-show="logoType === 'image'">
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Simulasikan Upload Logo Gambar</label>
+                                            <select x-model="logoImage" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs text-slate-700 focus:outline-none">
+                                                <option value="">Default Favicon Logo</option>
+                                                <option value="/pondok_hero_banner.png">Gunakan Banner Pesantren (Mock Logo)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Instansi Pondok</label>
+                                            <input type="text" x-model="pondokName" placeholder="Contoh: PPTQ Nurul Iman" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Tagline Instansi</label>
+                                            <input type="text" x-model="pondokTagline" placeholder="Contoh: Tahfidzul Qur'an" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Landing page hero settings -->
+                                <div class="space-y-4 pt-4">
+                                    <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">2. Informasi & Hero Landing Page</h4>
+                                    
+                                    <div class="grid sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Judul Hero (Baris 1)</label>
+                                            <input type="text" x-model="landingTitle" placeholder="Contoh: Membangun Generasi" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Judul Hero Highlight (Baris 2)</label>
+                                            <input type="text" x-model="landingTitleHighlight" placeholder="Contoh: Qur'ani & Unggul" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Deskripsi Hero</label>
+                                        <textarea x-model="landingDesc" rows="3" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none"></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Gambar Hero Banner</label>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <button @click="landingHeroImage = 'default'" class="py-2.5 rounded-xl text-xs font-bold border transition-all"
+                                                :class="landingHeroImage === 'default' ? 'bg-brand-navy text-white border-brand-navy' : 'bg-slate-50 text-slate-600 border-slate-200'">
+                                                Default Glassmorphic Card
+                                            </button>
+                                            <button @click="landingHeroImage = 'custom'" class="py-2.5 rounded-xl text-xs font-bold border transition-all"
+                                                :class="landingHeroImage === 'custom' ? 'bg-brand-navy text-white border-brand-navy' : 'bg-slate-50 text-slate-600 border-slate-200'">
+                                                Gambar Kustom (Desain Vektor)
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Statistics count settings -->
+                                <div class="space-y-4 pt-4">
+                                    <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">3. Statistik Landing Page</h4>
+                                    
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total Staff/Guru</label>
+                                            <input type="text" x-model="statsPersonnel" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total Santri</label>
+                                            <input type="text" x-model="statsSantri" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Total Halaqah</label>
+                                            <input type="text" x-model="statsHalaqah" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Akurasi Data</label>
+                                            <input type="text" x-model="statsAccuracy" class="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700 focus:outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Live Preview Panel -->
+                            <div class="lg:col-span-5 space-y-4">
+                                <h4 class="text-xs font-extrabold text-brand-navy uppercase tracking-wider border-b pb-2">Pratinjau Hasil (Live Preview)</h4>
+                                
+                                <div class="border rounded-2xl overflow-hidden shadow-md">
+                                    <div class="bg-slate-900 px-4 py-2 flex items-center justify-between text-slate-400 text-[10px] font-bold">
+                                        <span>PRATINJAU HEADER LANDING PAGE</span>
+                                        <i class="ri-window-line"></i>
+                                    </div>
+                                    <div class="p-4 bg-white border-b flex items-center justify-between">
+                                        <!-- Mock Header Logo Preview -->
+                                        <div class="flex items-center gap-2">
+                                            <div x-show="logoType === 'text'" class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-navy to-brand-navy-dark text-white font-bold text-sm" x-text="logoText"></div>
+                                            <div x-show="logoType === 'image'" class="h-8 w-8 rounded-lg overflow-hidden border">
+                                                <img :src="logoImage || '/favicon.ico'" class="h-full w-full object-cover">
+                                            </div>
+                                            <div>
+                                                <span class="text-xs font-bold text-brand-navy block leading-none" x-text="pondokName"></span>
+                                                <span class="text-[8px] uppercase tracking-wider text-brand-green font-semibold" x-text="pondokTagline"></span>
+                                            </div>
+                                        </div>
+                                        <span class="text-[9px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">Menu</span>
+                                    </div>
+                                </div>
+
+                                <div class="border rounded-2xl overflow-hidden shadow-md bg-gradient-to-br from-brand-navy to-[#0c266f] text-white">
+                                    <div class="bg-slate-900/50 px-4 py-2 flex items-center justify-between text-slate-300 text-[10px] font-bold border-b border-white/5">
+                                        <span>PRATINJAU HERO BANNER LANDING</span>
+                                        <i class="ri-image-line"></i>
+                                    </div>
+                                    <div class="p-6 space-y-6">
+                                        <div class="space-y-2">
+                                            <h3 class="text-base font-extrabold leading-tight">
+                                                <span x-text="landingTitle"></span> <br/>
+                                                <span class="bg-gradient-to-r from-brand-sky via-teal-200 to-brand-green bg-clip-text text-transparent" x-text="landingTitleHighlight"></span>
+                                            </h3>
+                                            <p class="text-[10px] text-slate-300 line-clamp-3 leading-relaxed" x-text="landingDesc"></p>
+                                        </div>
+
+                                        <div class="flex justify-center border border-white/10 rounded-xl bg-white/5 p-2">
+                                            <!-- Image preview toggle -->
+                                            <div x-show="landingHeroImage === 'default'" class="text-center py-6 text-slate-300">
+                                                <i class="ri-slideshow-3-line text-2xl mb-1 text-brand-green"></i>
+                                                <span class="text-[9px] block">Default Glassmorphic Card Active</span>
+                                            </div>
+                                            <div x-show="landingHeroImage === 'custom'" class="w-full h-24 overflow-hidden rounded-lg flex items-center justify-center">
+                                                <img src="/pondok_hero_banner.png" class="h-full w-full object-cover">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- ========================================== -->
-                <!-- MODULE 19: PROFILE & PASSWORD              -->
+                <!-- MODULE 20: PROFILE & PASSWORD              -->
                 <!-- ========================================== -->
                 <div x-show="activeTab === 'profile'" class="space-y-6">
                     <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
@@ -1910,6 +2088,21 @@
                 whatsappSender: '081234567890',
                 whatsappConnected: true,
 
+                // Branding & Landing Page State
+                logoType: localStorage.getItem('simpptq_logo_type') || 'text',
+                logoText: localStorage.getItem('simpptq_logo_text') || 'NI',
+                logoImage: localStorage.getItem('simpptq_logo_image') || '',
+                pondokName: localStorage.getItem('simpptq_pondok_name') || 'PPTQ Nurul Iman',
+                pondokTagline: localStorage.getItem('simpptq_pondok_tagline') || 'Sistem Manajemen Terpadu',
+                landingTitle: localStorage.getItem('simpptq_landing_hero_title') || 'Membangun Generasi',
+                landingTitleHighlight: localStorage.getItem('simpptq_landing_hero_title_highlight') || 'Qur\'ani & Unggul',
+                landingDesc: localStorage.getItem('simpptq_landing_hero_desc') || 'Selamat datang di Sistem Informasi Manajemen Terpusat PPTQ Nurul Iman. Solusi digital modern untuk mengelola data personil, kehadiran GPS, perkembangan santri, penggajian, dan operasional kepondokan secara real-time.',
+                landingHeroImage: localStorage.getItem('simpptq_landing_hero_image') || 'default',
+                statsPersonnel: localStorage.getItem('simpptq_landing_stats_personnel') || '40+',
+                statsSantri: localStorage.getItem('simpptq_landing_stats_santri') || '350+',
+                statsHalaqah: localStorage.getItem('simpptq_landing_stats_halaqah') || '15+',
+                statsAccuracy: localStorage.getItem('simpptq_landing_stats_accuracy') || '100%',
+
                 // Global Toast Alerts
                 toast: {
                     visible: false,
@@ -2164,7 +2357,8 @@
                         announcements: 'Papan Pengumuman',
                         reports: 'Laporan Eksekutif',
                         profile: 'Akun Kredensial Saya',
-                        whatsapp: 'Integrasi WhatsApp Fonnte'
+                        whatsapp: 'Integrasi WhatsApp Fonnte',
+                        branding: 'Pengaturan Branding & Landing Page'
                     };
                     return titles[this.activeTab] || 'Sistem Informasi';
                 },
@@ -2588,6 +2782,23 @@
 
                     this.triggerToast('success', 'Pesan uji coba sukses dikirim ke ' + phone + ' via Fonnte Gateway API!');
                     e.target.reset();
+                },
+
+                saveBrandingSettings() {
+                    localStorage.setItem('simpptq_logo_type', this.logoType);
+                    localStorage.setItem('simpptq_logo_text', this.logoText);
+                    localStorage.setItem('simpptq_logo_image', this.logoImage);
+                    localStorage.setItem('simpptq_pondok_name', this.pondokName);
+                    localStorage.setItem('simpptq_pondok_tagline', this.pondokTagline);
+                    localStorage.setItem('simpptq_landing_hero_title', this.landingTitle);
+                    localStorage.setItem('simpptq_landing_hero_title_highlight', this.landingTitleHighlight);
+                    localStorage.setItem('simpptq_landing_hero_desc', this.landingDesc);
+                    localStorage.setItem('simpptq_landing_hero_image', this.landingHeroImage);
+                    localStorage.setItem('simpptq_landing_stats_personnel', this.statsPersonnel);
+                    localStorage.setItem('simpptq_landing_stats_santri', this.statsSantri);
+                    localStorage.setItem('simpptq_landing_stats_halaqah', this.statsHalaqah);
+                    localStorage.setItem('simpptq_landing_stats_accuracy', this.statsAccuracy);
+                    this.triggerToast('success', 'Pengaturan branding & landing page berhasil disimpan dan dipublikasikan!');
                 },
 
                 // ----------------------------------------------------
