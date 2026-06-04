@@ -28,6 +28,7 @@ Sistem ini mengimplementasikan seluruh kebutuhan prioritas (RF-01 hingga RF-30):
 10. **Catatan Perilaku & Nilai**: Logging akumulasi poin pelanggaran/kebaikan santri dan input evaluasi perkembangan hafalan Al-Qur'an mingguan.
 11. **Register Kunjungan Wali**: Pencatatan data tamu jengukan santri.
 12. **Laporan Strategis**: Ekspor data rekapitulasi kehadiran, santri, dan perilaku ke format Microsoft Excel.
+13. **Integrasi WhatsApp Fonnte**: Panel konfigurasi token API dan nomor pengirim Fonnte beserta form uji coba pengiriman pesan instan langsung dari aplikasi.
 
 ---
 
