@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-brand-navy: #0b2265;
+    --color-brand-navy-dark: #071744;
+    --color-brand-green: #107c41;
+    --color-brand-green-dark: #0b592e;
+    --color-brand-teal: #0fa290;
+    --color-brand-sky: #eef6fc;
+}
+
+/* Custom scrollbars for clean UI */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Custom glassmorphism class */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+    background: rgba(11, 34, 101, 0.9);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Pulse animation for QR indicator */
+@keyframes qr-pulse {
+    0% { transform: translateY(0); opacity: 0.8; }
+    50% { transform: translateY(180px); opacity: 0.3; }
+    100% { transform: translateY(0); opacity: 0.8; }
+}
+
+.qr-scanner-line {
+    animation: qr-pulse 2s infinite linear;
+}
+
