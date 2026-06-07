@@ -12,7 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'permission' => \App\Http\Middleware\CheckPermission::class,
+        ]);
+
+        // User belum login yang membuka halaman ber-auth -> diarahkan ke /login.
+        $middleware->redirectGuestsTo('/login');
+        // User yang SUDAH login membuka halaman tamu (mis. /login) -> diarahkan ke dashboard /app.
+        $middleware->redirectUsersTo('/app');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

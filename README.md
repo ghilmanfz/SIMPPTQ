@@ -1,91 +1,106 @@
 # Sistem Informasi Manajemen PPTQ Nurul Iman (SIMPPTQ)
 
-SIMPPTQ adalah sistem informasi manajemen kepondokan berbasis web terpadu yang dirancang untuk mendigitalisasi operasional harian, pengelolaan data personil internal, presensi berbasis GPS, pencatatan akademik ringan santri, penggajian (payroll), serta laporan eksekutif di **PPTQ Nurul Iman**.
+SIMPPTQ adalah sistem informasi manajemen kepondokan berbasis web terpadu untuk mendigitalisasi operasional harian **PPTQ Nurul Iman**: pengelolaan personil internal, presensi berbasis GPS, izin/cuti, tukar jam mengajar, penggajian (payroll), data & presensi santri (kartu QR), nilai/perkembangan, perilaku, kunjungan, pengumuman, dashboard, dan laporan strategis.
 
-Proyek ini dibangun menggunakan **Laravel 11**, **Tailwind CSS v4**, dan **Alpine.js** untuk menghadirkan user interface modern, interaktif, dan responsif.
-
----
-
-## 🎨 Tema Visual & Estetika
-Tampilan antarmuka sistem mengikuti tema bersih (*clean*), modern, dan premium dengan kombinasi palet warna korporat/lembaga tepercaya:
-* **Navy Blue (`#0b2265`)**: Sebagai warna utama, melambangkan kestabilan, keteraturan, dan profesionalitas administrasi pondok.
-* **Emerald Green (`#107c41`)**: Sebagai aksen warna sekunder, merepresentasikan pertumbuhan, pembinaan karakter qur'ani, serta nilai-nilai keislaman.
-* **Glassmorphism Panels & Soft Gradients**: Memberikan sentuhan visual premium, rapi, dan modern di seluruh bagian dashboard.
+Dibangun dengan **Laravel 13 (MVC)**, **MySQL**, **Tailwind CSS v4**, dan **Alpine.js**. Seluruh data tersimpan di database (tidak ada data hardcode), dengan autentikasi dan otorisasi berbasis role-permission yang nyata.
 
 ---
 
-## 🚀 Fitur Utama & Modul Sistem
-Sistem ini mengimplementasikan seluruh kebutuhan prioritas (RF-01 hingga RF-30):
-1. **Landing Page Publik**: Halaman profil pondok (Visi, Misi, Nilai), papan pengumuman umum, dan link cepat menuju portal login.
-2. **Portal Kredensial dengan Akses Demo**: Form login aman yang dilengkapi panel uji coba peran (*Akses Presets*) untuk memudahkan demonstrasi hak akses.
-3. **Manajemen Akun & Role-Permission Granular**: Kontrol penuh atas penambahan user dan pengaturan hak akses detail per modul secara dinamis.
-4. **Data Personil Internal & Dokumen**: Pengelolaan data pegawai, status hubungan kerja (Tetap/Tidak Tetap), fungsi kerja (Pengajar/Non-Pengajar), serta dokumen arsip digital.
-5. **Presensi GPS Web**: Melakukan check-in/out harian dengan validasi otomatis radius koordinat lokasi pondok.
-6. **Alur Izin/Cuti & Tukar Jam**: Pengajuan cuti terintegrasi bagi staf dan formulir tukar jam mengajar bagi ustadz yang dilengkapi dengan dashboard persetujuan operator.
-7. **Penggajian (Payroll)**: Penghitungan otomatis gaji berkala beserta cetak/unduh PDF rincian slip gaji digital karyawan.
-8. **Kartu QR Santri**: Generate kartu identitas santri yang dilengkapi QR code unik untuk absensi fisik.
-9. **Scan QR Absensi Santri**: Simulator scanner barcode kamera untuk absensi kehadiran santri secara cepat oleh petugas.
-10. **Catatan Perilaku & Nilai**: Logging akumulasi poin pelanggaran/kebaikan santri dan input evaluasi perkembangan hafalan Al-Qur'an mingguan.
-11. **Register Kunjungan Wali**: Pencatatan data tamu jengukan santri.
-12. **Laporan Strategis**: Ekspor data rekapitulasi kehadiran, santri, dan perilaku ke format Microsoft Excel.
-13. **Integrasi WhatsApp Fonnte**: Panel konfigurasi token API dan nomor pengirim Fonnte beserta form uji coba pengiriman pesan instan langsung dari aplikasi.
+## 🎨 Tema Visual
+Tampilan bersih, modern, dan premium dengan palet korporat:
+* **Navy Blue (`#0b2265`)** — warna utama (profesionalitas administrasi).
+* **Emerald Green (`#107c41`)** — aksen (nilai qur'ani & pertumbuhan).
+* Panel rounded, soft shadow, dan tipografi *Plus Jakarta Sans*.
 
 ---
 
-## 🛠️ Langkah Instalasi Lokal
+## 🧱 Arsitektur
+* **Backend:** Laravel 13 — Controller + Eloquent Model + Blade (server-rendered MVC).
+* **Database:** MySQL, ±25 tabel ber-relasi (lihat `database/migrations`).
+* **Autentikasi:** session-based, throttling 5x percobaan, hanya akun aktif yang bisa masuk (tanpa registrasi publik).
+* **Otorisasi:** sistem role–permission kustom (`roles`, `permissions`, pivot) + `Gate::before`. Permission diperiksa via middleware `permission:` dan direktif `@can` di Blade.
+* **Fungsi kerja** (Non-Pengajar / Pengajar / Dua Fungsi) dipisahkan dari role — menentukan kelayakan modul operasional (jadwal & tukar jam).
+* **Presensi GPS:** validasi jarak sungguhan (rumus *haversine*) terhadap radius lokasi.
+* **Integrasi WhatsApp:** pengiriman nyata ke API **Fonnte** via HTTP.
+* **Penyimpanan berkas:** logo/hero/foto di disk publik; dokumen sensitif personil di disk privat.
 
-Ikuti langkah-langkah berikut untuk menjalankan aplikasi di lingkungan pengembangan lokal Anda:
+---
 
-### 1. Kloning Repositori
+## 🚀 Modul Sistem
+1. **Landing Page & Branding dinamis** — konten, logo, hero, statistik diatur dari menu Branding (tersimpan di DB).
+2. **Autentikasi & Profil** — login/logout, ganti password, profil terbatas.
+3. **Manajemen User & Role–Permission** — CRUD akun, matriks hak akses per modul.
+4. **Personil Internal & Dokumen** — CRUD, status & fungsi kerja, unggah dokumen privat.
+5. **Jadwal Mengajar** — kelola jadwal dengan validasi bentrok pengajar & kelas.
+6. **Presensi GPS** — check-in/out dengan validasi radius lokasi + rekap.
+7. **Izin/Cuti & Tukar Jam** — pengajuan + alur persetujuan (approve/reject). Tukar jam membuat *pengecualian jadwal* tanpa mengubah jadwal master.
+8. **Penggajian (Payroll)** — periode, proses berbasis kehadiran, finalisasi & kunci, slip gaji.
+9. **Data Santri & Kartu QR** — CRUD, filter, generate kartu santri ber-QR (cetak).
+10. **Presensi Santri** — pencatatan kehadiran via scan token kartu / input manual.
+11. **Kelas, Master Akademik** — rombel, tahun ajaran, mapel/halaqah, sesi.
+12. **Perilaku, Nilai, Kunjungan** — poin pelanggaran/kebaikan, nilai/perkembangan, register jenguk wali.
+13. **Pengumuman** — papan pengumuman bertarget role.
+14. **Laporan Strategis** — rekap terfilter (periode) + cetak.
+15. **Integrasi WhatsApp Fonnte** — konfigurasi token & uji kirim pesan nyata.
+
+---
+
+## 🛠️ Instalasi Lokal
+
+Prasyarat: PHP 8.3+, Composer, Node.js, MySQL (mis. via Laragon).
+
 ```bash
 git clone https://github.com/ghilmanfz/SIMPPTQ.git
 cd SIMPPTQ
-```
 
-### 2. Instalasi Dependensi PHP & JavaScript
-```bash
-# Instal dependensi PHP (Composer)
 composer install
-
-# Instal dependensi JavaScript (NPM)
 npm install
-```
 
-### 3. Konfigurasi Lingkungan (`.env`)
-Salin file `.env.example` menjadi `.env` dan konfigurasikan database Anda:
-```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### 4. Jalankan Migrasi Database & Seeder (Jika Diperlukan)
-```bash
-php artisan migrate
+Atur koneksi database di `.env` (default sudah `mysql` / database `simpptq`):
+```env
+DB_DATABASE=simpptq
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-### 5. Kompilasi Aset Frontend (Vite)
-Jalankan compiler aset di latar belakang:
+Buat database `simpptq`, lalu migrasi + isi data awal, build aset, dan jalankan:
 ```bash
-npm run dev
-```
-Atau untuk build produksi:
-```bash
-npm run build
-```
-
-### 6. Jalankan Server PHP
-```bash
+php artisan migrate:fresh --seed
+php artisan storage:link
+npm run build        # atau: npm run dev (mode pengembangan)
 php artisan serve
 ```
-Akses aplikasi melalui browser di `http://localhost:8000`.
+Akses di `http://localhost:8000` (atau virtual host Laragon, mis. `http://simpptq.test`).
 
 ---
 
-## 👥 Hak Akses Uji Coba Cepat (Demo Akun)
-Pada halaman login, Anda dapat mengeklik salah satu tombol pintas peran untuk masuk secara instan:
-* **Super Admin**: Akun konfigurasi sistem dan kelola hak peran.
-* **Admin Operasional**: Manajemen personil, santri, persetujuan izin, dan payroll.
-* **Guru (Pengajar)**: Lihat jadwal mengajar, ajukan tukar jam, input nilai, dan GPS check-in.
-* **Staff Non-Pengajar**: GPS check-in dan pengajuan cuti.
-* **Dua Fungsi**: Gabungan menu guru dan staf administrasi.
-* **Pimpinan**: Visualisasi analitik grafik kehadiran dan monitoring laporan santri.
+## 👥 Akun Demo
+Tersedia tombol **Uji Coba Cepat** di halaman login, atau masuk manual:
+
+| Peran | Email | Password |
+| --- | --- | --- |
+| Super Admin | `superadmin@nuruliman.net` | `superadmin123` |
+| Admin Operasional | `petugas@nuruliman.net` | `petugas123` |
+| Guru (Pengajar) | `ustadz.ahmad@nuruliman.net` | `ustadz123` |
+| Staf Non-Pengajar | `staff.budiyono@nuruliman.net` | `staff123` |
+| Dua Fungsi | `ustadz.fatkur@nuruliman.net` | `ustadzstaff123` |
+| Pimpinan | `pimpinan.kiai@nuruliman.net` | `kiai123` |
+
+> Menu yang tampil menyesuaikan permission tiap peran secara otomatis.
+
+---
+
+## ✅ Pengujian
+Smoke test memverifikasi seluruh route, otorisasi per role, dan alur inti (login, CRUD, presensi GPS, approval) memakai SQLite in-memory:
+```bash
+php artisan test
+```
+
+---
+
+## 📌 Catatan
+Modul lanjutan (komponen gaji granular, workflow kenaikan kelas, ekspor Excel) dapat dikembangkan bertahap sesuai metode Agile tanpa mengubah fondasi yang ada.
