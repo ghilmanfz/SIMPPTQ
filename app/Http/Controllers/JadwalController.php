@@ -10,6 +10,7 @@ use App\Models\Sesi;
 use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -39,6 +40,26 @@ class JadwalController extends Controller
         $days = self::DAYS;
 
         return view('jadwal.index', compact('jadwals', 'canManage', 'pengajar', 'kelasList', 'mapels', 'sesis', 'days'));
+    }
+
+    /**
+     * Jadwal efektif pada satu tanggal: jadwal master hari itu + penerapan
+     * pengecualian (tukar jam) sehingga terlihat "B menggantikan A".
+     */
+    public function today(Request $request): View
+    {
+        $date = $request->filled('date') ? Carbon::parse($request->date) : Carbon::today();
+        $dayName = self::DAYS[$date->dayOfWeekIso - 1]; // ISO 1=Senin .. 7=Ahad
+
+        $jadwals = Jadwal::with([
+            'personil', 'kelas', 'mapel', 'sesi',
+            'exceptions' => fn ($q) => $q->whereDate('date', $date->toDateString())->with('substitute'),
+        ])
+            ->where('day', $dayName)
+            ->orderBy('start_time')
+            ->get();
+
+        return view('jadwal.today', compact('jadwals', 'date', 'dayName'));
     }
 
     public function store(Request $request): RedirectResponse

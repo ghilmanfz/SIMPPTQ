@@ -37,6 +37,7 @@
                         <th class="text-left px-5 py-3">Personil</th>
                         <th class="text-right px-5 py-3">Gaji Pokok</th>
                         <th class="text-right px-5 py-3">Tunjangan</th>
+                        <th class="text-right px-5 py-3">Honor Mengajar</th>
                         <th class="text-right px-5 py-3">Potongan</th>
                         <th class="text-right px-5 py-3">Hadir/Telat</th>
                         <th class="text-right px-5 py-3">Total</th>
@@ -48,12 +49,13 @@
                             <td class="px-5 py-3 font-semibold text-brand-navy">{{ $slip->personil?->name }}</td>
                             <td class="px-5 py-3 text-right text-slate-600">{{ rupiah($slip->salary_base) }}</td>
                             <td class="px-5 py-3 text-right text-emerald-600">{{ rupiah($slip->allowance) }}</td>
+                            <td class="px-5 py-3 text-right text-emerald-600">{{ rupiah($slip->teaching_honor) }}</td>
                             <td class="px-5 py-3 text-right text-red-500">{{ rupiah($slip->deduction + $slip->attendance_deduction) }}</td>
                             <td class="px-5 py-3 text-right text-slate-500">{{ $slip->present_days }}/{{ $slip->late_days }}</td>
                             <td class="px-5 py-3 text-right font-bold text-brand-navy">{{ rupiah($slip->total) }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-5 py-10 text-center text-slate-400">Belum diproses. Klik tombol <b>Proses</b> untuk menghitung gaji.</td></tr>
+                        <tr><td colspan="7" class="px-5 py-10 text-center text-slate-400">Belum diproses. Klik tombol <b>Proses</b> untuk menghitung gaji.</td></tr>
                     @endforelse
                 </tbody>
             </table>

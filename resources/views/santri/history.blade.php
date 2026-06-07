@@ -22,9 +22,14 @@
         <div class="h-14 w-14 rounded-full bg-brand-sky text-brand-navy flex items-center justify-center text-lg font-bold overflow-hidden">
             @if ($santri->photoUrl())<img src="{{ $santri->photoUrl() }}" class="h-full w-full object-cover">@else {{ strtoupper(mb_substr($santri->name,0,1)) }} @endif
         </div>
-        <div>
+        <div class="flex-1">
             <h2 class="text-lg font-bold text-brand-navy">{{ $santri->name }}</h2>
             <p class="text-xs text-slate-400">NIS {{ $santri->nis }} · Kelas saat ini: <span class="font-semibold text-slate-600">{{ $santri->kelas?->name ?? '-' }}</span> · Status: {{ $santri->status }}</p>
+        </div>
+        @php($score = $santri->behaviorScore())
+        <div class="text-center px-4 py-2 rounded-xl {{ $score >= 0 ? 'bg-blue-50' : 'bg-red-50' }}">
+            <p class="text-xl font-extrabold {{ $score >= 0 ? 'text-blue-600' : 'text-red-500' }}">{{ $score >= 0 ? '+' : '' }}{{ $score }}</p>
+            <p class="text-[10px] text-slate-400 font-semibold uppercase">Skor Perilaku</p>
         </div>
     </div>
 

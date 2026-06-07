@@ -20,6 +20,9 @@
                 <div class="p-5 space-y-2 text-sm">
                     <div class="flex justify-between"><span class="text-slate-500">Gaji Pokok</span><span class="font-semibold text-slate-700">{{ rupiah($slip->salary_base) }}</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Tunjangan</span><span class="font-semibold text-emerald-600">+ {{ rupiah($slip->allowance) }}</span></div>
+                    @if ($slip->teaching_honor > 0)
+                        <div class="flex justify-between"><span class="text-slate-500">Honor Mengajar</span><span class="font-semibold text-emerald-600">+ {{ rupiah($slip->teaching_honor) }}</span></div>
+                    @endif
                     <div class="flex justify-between"><span class="text-slate-500">Potongan Tetap</span><span class="font-semibold text-red-500">- {{ rupiah($slip->deduction) }}</span></div>
                     <div class="flex justify-between"><span class="text-slate-500">Potongan Kehadiran ({{ $slip->late_days }}x telat)</span><span class="font-semibold text-red-500">- {{ rupiah($slip->attendance_deduction) }}</span></div>
                     <div class="flex justify-between text-[11px] text-slate-400"><span>Kehadiran</span><span>{{ $slip->present_days }} hari</span></div>

@@ -81,6 +81,7 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
 
     // --- Jadwal mengajar ---
     Route::get('jadwal', [JadwalController::class, 'index'])->name('jadwal.index')->middleware('permission:schedule_view');
+    Route::get('jadwal/hari-ini', [JadwalController::class, 'today'])->name('jadwal.today')->middleware('permission:schedule_view');
     Route::middleware('permission:schedule_manage')->group(function () {
         Route::post('jadwal', [JadwalController::class, 'store'])->name('jadwal.store');
         Route::put('jadwal/{jadwal}', [JadwalController::class, 'update'])->name('jadwal.update');
@@ -152,6 +153,8 @@ Route::middleware('auth')->prefix('app')->name('app.')->group(function () {
 
     // --- Perilaku (pelanggaran & kebaikan) ---
     Route::get('perilaku', [BehaviorController::class, 'index'])->name('behaviors.index')->middleware('permission:behavior_log');
+    Route::get('perilaku/rekap', [BehaviorController::class, 'rekap'])->name('behaviors.rekap')->middleware('permission:behavior_log');
+    Route::get('perilaku/export', [BehaviorController::class, 'export'])->name('behaviors.export')->middleware('permission:behavior_log');
     Route::post('perilaku', [BehaviorController::class, 'store'])->name('behaviors.store')->middleware('permission:behavior_log');
     Route::delete('perilaku/{behavior}', [BehaviorController::class, 'destroy'])->name('behaviors.destroy')->middleware('permission:behavior_log');
 

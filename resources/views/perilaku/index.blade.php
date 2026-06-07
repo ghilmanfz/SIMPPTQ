@@ -2,7 +2,63 @@
 @section('title', 'Perilaku & Poin Santri')
 
 @section('content')
-<div class="grid lg:grid-cols-3 gap-6">
+<div class="space-y-5">
+    {{-- Filter + aksi --}}
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 flex flex-wrap items-end gap-3">
+        <form method="GET" class="flex flex-wrap items-end gap-2">
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase">Santri</label>
+                <select name="santri_id" class="mt-1 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Semua Santri</option>
+                    @foreach ($santriList as $s)<option value="{{ $s->id }}" @selected(request('santri_id') == $s->id)>{{ $s->name }}</option>@endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase">Jenis</label>
+                <select name="type" class="mt-1 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                    <option value="">Semua</option>
+                    <option value="Kebaikan" @selected(request('type')==='Kebaikan')>Kebaikan</option>
+                    <option value="Pelanggaran" @selected(request('type')==='Pelanggaran')>Pelanggaran</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase">Dari</label>
+                <input type="date" name="start" value="{{ request('start') }}" class="mt-1 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-500 uppercase">Sampai</label>
+                <input type="date" name="end" value="{{ request('end') }}" class="mt-1 rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            </div>
+            <button class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200">Filter</button>
+            @if (request()->hasAny(['santri_id','type','start','end']))
+                <a href="{{ route('app.behaviors.index') }}" class="rounded-xl px-3 py-2 text-sm font-semibold text-slate-400 hover:text-slate-600">Reset</a>
+            @endif
+        </form>
+        <div class="flex gap-2 ml-auto">
+            <a href="{{ route('app.behaviors.rekap') }}" class="rounded-xl bg-brand-navy text-white px-4 py-2 text-sm font-bold hover:bg-brand-navy-dark flex items-center gap-1.5"><i class="ri-bar-chart-2-line"></i> Rekap & Peringkat</a>
+            <a href="{{ route('app.behaviors.export', request()->only('santri_id','type','start','end')) }}" class="rounded-xl bg-brand-green text-white px-4 py-2 text-sm font-bold hover:bg-brand-green-dark flex items-center gap-1.5"><i class="ri-file-excel-2-line"></i> Excel</a>
+        </div>
+    </div>
+
+    {{-- Kartu ringkasan skor santri terpilih --}}
+    @if ($summary)
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:col-span-1 flex items-center gap-3">
+                <div class="h-11 w-11 rounded-full bg-brand-sky text-brand-navy flex items-center justify-center font-bold">{{ strtoupper(mb_substr($summary['santri']->name,0,1)) }}</div>
+                <div>
+                    <p class="font-bold text-brand-navy leading-tight">{{ $summary['santri']->name }}</p>
+                    <p class="text-[11px] text-slate-400">Kelas {{ $summary['santri']->kelas?->name ?? '-' }}</p>
+                </div>
+            </div>
+            <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-4 text-center"><p class="text-2xl font-bold text-emerald-600">+{{ $summary['kebaikan'] }}</p><p class="text-[11px] text-emerald-700/70 font-semibold uppercase">Total Kebaikan</p></div>
+            <div class="rounded-2xl border p-4 text-center {{ $summary['saldo'] >= 0 ? 'bg-blue-50 border-blue-100' : 'bg-red-50 border-red-100' }}">
+                <p class="text-2xl font-bold {{ $summary['saldo'] >= 0 ? 'text-blue-600' : 'text-red-500' }}">{{ $summary['saldo'] >= 0 ? '+' : '' }}{{ $summary['saldo'] }}</p>
+                <p class="text-[11px] text-slate-500 font-semibold uppercase">Saldo Poin (−{{ $summary['pelanggaran'] }} pelanggaran)</p>
+            </div>
+        </div>
+    @endif
+
+    <div class="grid lg:grid-cols-3 gap-6">
     <div class="lg:col-span-1">
         <div class="bg-white rounded-2xl border border-slate-200 p-5">
             <h3 class="font-bold text-brand-navy mb-4">Catat Perilaku</h3>
@@ -67,6 +123,7 @@
             </div>
             <div class="px-5 py-3">{{ $behaviors->links() }}</div>
         </div>
+    </div>
     </div>
 </div>
 @endsection

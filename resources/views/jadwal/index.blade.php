@@ -3,11 +3,12 @@
 
 @section('content')
 <div x-data="jadwalModule()" class="space-y-5">
-    @if ($canManage)
-        <div class="flex justify-end">
+    <div class="flex flex-wrap justify-end gap-2">
+        <a href="{{ route('app.jadwal.today') }}" class="rounded-xl bg-brand-sky text-brand-navy px-4 py-2.5 text-sm font-bold hover:bg-brand-navy hover:text-white transition-colors flex items-center gap-2"><i class="ri-calendar-todo-line"></i> Jadwal Hari Ini</a>
+        @if ($canManage)
             <button @click="openCreate()" class="rounded-xl bg-brand-navy text-white px-4 py-2.5 text-sm font-bold hover:bg-brand-navy-dark flex items-center gap-2"><i class="ri-add-line"></i> Tambah Jadwal</button>
-        </div>
-    @endif
+        @endif
+    </div>
 
     <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         @foreach ($days as $day)

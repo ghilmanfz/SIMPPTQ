@@ -67,6 +67,16 @@ class Santri extends Model
         return $this->status === 'Aktif';
     }
 
+    /**
+     * Saldo poin perilaku santri (total Kebaikan - total Pelanggaran).
+     */
+    public function behaviorScore(): int
+    {
+        return (int) $this->behaviors()
+            ->selectRaw("COALESCE(SUM(CASE WHEN type = 'Kebaikan' THEN points ELSE -points END), 0) as s")
+            ->value('s');
+    }
+
     public function photoUrl(): ?string
     {
         return $this->photo_path ? asset('storage/' . $this->photo_path) : null;

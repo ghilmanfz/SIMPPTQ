@@ -16,18 +16,29 @@
     @if ($canApply)
         <div class="lg:col-span-1">
             <div class="bg-white rounded-2xl border border-slate-200 p-5">
-                <h3 class="font-bold text-brand-navy mb-4">Ajukan Tukar Jam</h3>
-                @if ($mySchedules->isEmpty())
-                    <p class="text-sm text-slate-400">Anda belum memiliki jadwal mengajar.</p>
+                <h3 class="font-bold text-brand-navy mb-1">Ajukan Tukar Jam</h3>
+                <p class="text-[11px] text-slate-400 mb-4">Pilih <b>jadwal Anda</b> untuk minta digantikan, atau pilih <b>jadwal rekan</b> lalu tetapkan diri Anda sebagai pengganti (mis. rekan berhalangan).</p>
+                @if ($allSchedules->isEmpty())
+                    <p class="text-sm text-slate-400">Belum ada jadwal mengajar di sistem.</p>
                 @else
-                    <form method="POST" action="{{ route('app.swaps.store') }}" class="space-y-3">
+                    @php($myJadwals = $allSchedules->where('personil_id', $personil?->id))
+                    @php($otherJadwals = $allSchedules->where('personil_id', '!=', $personil?->id))
+                    <form method="POST" action="{{ route('app.swaps.store') }}" class="space-y-3" x-data="swapForm({{ $personil?->id ?? 'null' }}, @js($personil?->name))">
                         @csrf
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase">Jadwal</label>
-                            <select name="jadwal_id" required class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
-                                @foreach ($mySchedules as $s)
-                                    <option value="{{ $s->id }}">{{ $s->day }} · {{ $s->sesi?->name }} — {{ $s->mapel?->name ?? 'Halaqah' }} ({{ $s->kelas?->name }})</option>
-                                @endforeach
+                            <select name="jadwal_id" required @change="onJadwalChange($event)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+                                <option value="" data-owner="">— Pilih jadwal —</option>
+                                @if ($myJadwals->isNotEmpty())
+                                    <optgroup label="Jadwal Saya">
+                                        @foreach ($myJadwals as $s)<option value="{{ $s->id }}" data-owner="{{ $s->personil_id }}">{{ $s->day }} · {{ $s->sesi?->name }} — {{ $s->mapel?->name ?? 'Halaqah' }} ({{ $s->kelas?->name }})</option>@endforeach
+                                    </optgroup>
+                                @endif
+                                @if ($otherJadwals->isNotEmpty())
+                                    <optgroup label="Jadwal Rekan">
+                                        @foreach ($otherJadwals as $s)<option value="{{ $s->id }}" data-owner="{{ $s->personil_id }}">{{ $s->day }} · {{ $s->sesi?->name }} — {{ $s->mapel?->name ?? 'Halaqah' }} ({{ $s->kelas?->name }}) · {{ $s->personil?->name }}</option>@endforeach
+                                    </optgroup>
+                                @endif
                             </select>
                         </div>
                         <div>
@@ -36,12 +47,27 @@
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase">Guru Pengganti</label>
-                            <select name="target_personil_id" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
-                                <option value="">— Belum ditentukan —</option>
-                                @foreach ($teachers as $t)
-                                    <option value="{{ $t->id }}">{{ $t->name }}</option>
-                                @endforeach
-                            </select>
+
+                            {{-- Menggantikan jadwal rekan: terkunci ke diri sendiri --}}
+                            <template x-if="isColleague">
+                                <div>
+                                    <input type="hidden" name="target_personil_id" :value="myId">
+                                    <div class="mt-1 w-full rounded-xl border border-brand-green/40 bg-brand-green/5 px-3 py-2.5 text-sm font-semibold text-brand-navy flex items-center gap-2"><i class="ri-lock-line text-brand-green"></i> <span x-text="myName + ' (Saya)'"></span></div>
+                                    <p class="text-[11px] text-slate-400 mt-1">Memilih jadwal rekan berarti <b>Anda</b> yang menggantikan.</p>
+                                </div>
+                            </template>
+
+                            {{-- Jadwal sendiri: pilih guru lain sebagai pengganti --}}
+                            <template x-if="!isColleague">
+                                <select name="target_personil_id" required class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+                                    <option value="">— Pilih pengganti —</option>
+                                    @foreach ($teachers as $t)
+                                        @if ($t->id !== $personil?->id)
+                                            <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </template>
                         </div>
                         <div>
                             <label class="text-xs font-bold text-slate-500 uppercase">Alasan</label>
@@ -62,9 +88,9 @@
                     @forelse ($pending as $req)
                         <div class="px-5 py-4 flex items-center justify-between gap-3">
                             <div>
-                                <p class="text-sm font-semibold text-brand-navy">{{ $req->requester?->name }}</p>
-                                <p class="text-[11px] text-slate-400">{{ $req->jadwal?->day }} · {{ $req->jadwal?->mapel?->name ?? 'Halaqah' }} ({{ $req->jadwal?->kelas?->name }}) — {{ tgl($req->date) }}</p>
-                                <p class="text-xs text-slate-500 mt-1">Pengganti: {{ $req->target?->name ?? 'Belum ditentukan' }} · {{ $req->reason }}</p>
+                                <p class="text-sm font-semibold text-brand-navy">{{ $req->jadwal?->day }} · {{ $req->jadwal?->mapel?->name ?? 'Halaqah' }} ({{ $req->jadwal?->kelas?->name }}) — {{ tgl($req->date) }}</p>
+                                <p class="text-[11px] text-slate-400">Pengajar asli: <b>{{ $req->jadwal?->personil?->name }}</b> → Pengganti: <b class="text-brand-navy">{{ $req->target?->name ?? '—' }}</b></p>
+                                <p class="text-xs text-slate-500 mt-1">Diajukan oleh {{ $req->requester?->name }} · {{ $req->reason }}</p>
                             </div>
                             <div class="flex gap-2 shrink-0">
                                 <form method="POST" action="{{ route('app.swaps.approve', $req) }}"><x-csrf-button class="bg-emerald-500 hover:bg-emerald-600"><i class="ri-check-line"></i></x-csrf-button></form>
@@ -105,3 +131,22 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function swapForm(myId, myName) {
+        return {
+            myId: myId,
+            myName: myName ?? 'Saya',
+            jadwalOwner: null,
+            // Jadwal milik rekan (pemilik bukan saya) -> pengganti dikunci ke diri sendiri.
+            get isColleague() { return this.jadwalOwner !== null && this.jadwalOwner !== this.myId; },
+            onJadwalChange(e) {
+                const opt = e.target.selectedOptions[0];
+                const owner = opt && opt.dataset.owner ? parseInt(opt.dataset.owner) : null;
+                this.jadwalOwner = owner;
+            },
+        };
+    }
+</script>
+@endpush

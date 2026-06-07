@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JadwalException;
 use App\Models\PayrollPeriod;
 use App\Models\Payslip;
 use App\Models\Personil;
@@ -91,7 +92,19 @@ class PayrollController extends Controller
             return back()->with('error', 'Periode sudah difinalisasi dan tidak dapat diproses ulang.');
         }
 
-        foreach (Personil::where('is_active', true)->get() as $personil) {
+        // Hitung kemunculan tiap hari (ISO 1=Senin .. 7=Ahad) sepanjang periode.
+        $dayMap = ['Senin' => 1, 'Selasa' => 2, 'Rabu' => 3, 'Kamis' => 4, 'Jumat' => 5, 'Sabtu' => 6, 'Ahad' => 7];
+        $dayCount = array_fill(1, 7, 0);
+        for ($d = $period->start_date->copy(); $d->lte($period->end_date); $d->addDay()) {
+            $dayCount[$d->dayOfWeekIso]++;
+        }
+
+        // Semua pengecualian "Tukar" pada periode (untuk pengalihan honor pengganti).
+        $exceptions = JadwalException::with('jadwal')
+            ->where('type', 'Tukar')
+            ->whereBetween('date', [$period->start_date, $period->end_date])->get();
+
+        foreach (Personil::where('is_active', true)->with('jadwals')->get() as $personil) {
             $presences = PresensiPersonil::where('personil_id', $personil->id)
                 ->whereBetween('date', [$period->start_date, $period->end_date])->get();
 
@@ -99,10 +112,22 @@ class PayrollController extends Controller
             $lateDays = $presences->where('status', 'Terlambat')->count();
             $attendanceDeduction = $lateDays * self::LATE_PENALTY;
 
+            // Jumlah sesi mengajar efektif dalam periode.
+            $sessions = 0;
+            foreach ($personil->jadwals as $jadwal) {
+                $sessions += $dayCount[$dayMap[$jadwal->day] ?? 0] ?? 0;
+            }
+            // Kurangi sesi yang digantikan orang lain (personil ini tidak mengajar).
+            $sessions -= $exceptions->filter(fn ($e) => $e->jadwal?->personil_id === $personil->id)->count();
+            // Tambah sesi di mana personil ini menjadi guru pengganti.
+            $sessions += $exceptions->where('substitute_personil_id', $personil->id)->count();
+            $sessions = max(0, $sessions);
+
             $base = (float) $personil->salary_base;
             $allowance = (float) $personil->salary_allowance;
             $deduction = (float) $personil->salary_deduction;
-            $total = $base + $allowance - $deduction - $attendanceDeduction;
+            $teachingHonor = $sessions * (float) $personil->honor_per_sesi;
+            $total = $base + $allowance + $teachingHonor - $deduction - $attendanceDeduction;
 
             Payslip::updateOrCreate(
                 ['payroll_period_id' => $period->id, 'personil_id' => $personil->id],
@@ -111,7 +136,7 @@ class PayrollController extends Controller
                     'allowance' => $allowance,
                     'deduction' => $deduction,
                     'attendance_deduction' => $attendanceDeduction,
-                    'teaching_honor' => 0,
+                    'teaching_honor' => $teachingHonor,
                     'total' => $total,
                     'present_days' => $presentDays,
                     'absent_days' => 0,
@@ -120,7 +145,7 @@ class PayrollController extends Controller
             );
         }
 
-        return back()->with('success', 'Penggajian berhasil diproses. Silakan periksa pratinjau sebelum finalisasi.');
+        return back()->with('success', 'Penggajian berhasil diproses (termasuk honor mengajar). Periksa pratinjau sebelum finalisasi.');
     }
 
     public function finalize(PayrollPeriod $period): RedirectResponse

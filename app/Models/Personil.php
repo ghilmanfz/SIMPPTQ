@@ -27,6 +27,7 @@ class Personil extends Model
         'salary_base',
         'salary_allowance',
         'salary_deduction',
+        'honor_per_sesi',
         'photo_path',
         'is_active',
     ];
@@ -37,6 +38,7 @@ class Personil extends Model
         'salary_base' => 'decimal:2',
         'salary_allowance' => 'decimal:2',
         'salary_deduction' => 'decimal:2',
+        'honor_per_sesi' => 'decimal:2',
     ];
 
     public function user(): BelongsTo

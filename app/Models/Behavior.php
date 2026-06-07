@@ -31,4 +31,12 @@ class Behavior extends Model
     {
         return $this->belongsTo(User::class, 'recorded_by');
     }
+
+    /**
+     * Poin bertanda: Kebaikan positif, Pelanggaran negatif.
+     */
+    public function signedPoints(): int
+    {
+        return $this->type === 'Kebaikan' ? $this->points : -$this->points;
+    }
 }

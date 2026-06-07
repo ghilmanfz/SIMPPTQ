@@ -80,6 +80,7 @@
                     <div><label class="text-xs font-bold text-slate-500 uppercase">Gaji Pokok</label><input type="number" name="salary_base" x-model="form.salary_base" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></div>
                     <div><label class="text-xs font-bold text-slate-500 uppercase">Tunjangan</label><input type="number" name="salary_allowance" x-model="form.salary_allowance" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></div>
                     <div><label class="text-xs font-bold text-slate-500 uppercase">Potongan</label><input type="number" name="salary_deduction" x-model="form.salary_deduction" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"></div>
+                    <div><label class="text-xs font-bold text-slate-500 uppercase">Honor / Sesi Mengajar</label><input type="number" name="honor_per_sesi" x-model="form.honor_per_sesi" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="mis. 25000"></div>
                     <div><label class="text-xs font-bold text-slate-500 uppercase">Tautkan Akun</label>
                         <select name="user_id" x-model="form.user_id" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
                             <option value="">— Tanpa akun —</option>
@@ -106,12 +107,12 @@
     function personilModule() {
         return {
             open: false, mode: 'create', form: {},
-            blank: { id: null, name: '', nik: '', jabatan: '', unit_kerja: '', fungsi_kerja: 'Non-Pengajar', status_kerja: 'Tetap', phone: '', email: '', salary_base: 0, salary_allowance: 0, salary_deduction: 0, user_id: '', linked_user_id: '', linked_user_label: '' },
+            blank: { id: null, name: '', nik: '', jabatan: '', unit_kerja: '', fungsi_kerja: 'Non-Pengajar', status_kerja: 'Tetap', phone: '', email: '', salary_base: 0, salary_allowance: 0, salary_deduction: 0, honor_per_sesi: 0, user_id: '', linked_user_id: '', linked_user_label: '' },
             get actionUrl() { return this.mode === 'create' ? '{{ route('app.personil.store') }}' : '{{ url('app/personil') }}/' + this.form.id; },
             openCreate() { this.mode = 'create'; this.form = { ...this.blank }; this.open = true; },
             openEdit(p) {
                 this.mode = 'edit';
-                this.form = { id: p.id, name: p.name, nik: p.nik ?? '', jabatan: p.jabatan ?? '', unit_kerja: p.unit_kerja ?? '', fungsi_kerja: p.fungsi_kerja, status_kerja: p.status_kerja, phone: p.phone ?? '', email: p.email ?? '', salary_base: p.salary_base, salary_allowance: p.salary_allowance, salary_deduction: p.salary_deduction, user_id: p.user_id ?? '', linked_user_id: p.user_id ?? '', linked_user_label: p.user ? (p.user.name + ' (' + p.user.email + ')') : '' };
+                this.form = { id: p.id, name: p.name, nik: p.nik ?? '', jabatan: p.jabatan ?? '', unit_kerja: p.unit_kerja ?? '', fungsi_kerja: p.fungsi_kerja, status_kerja: p.status_kerja, phone: p.phone ?? '', email: p.email ?? '', salary_base: p.salary_base, salary_allowance: p.salary_allowance, salary_deduction: p.salary_deduction, honor_per_sesi: p.honor_per_sesi ?? 0, user_id: p.user_id ?? '', linked_user_id: p.user_id ?? '', linked_user_label: p.user ? (p.user.name + ' (' + p.user.email + ')') : '' };
                 this.open = true;
             },
         };

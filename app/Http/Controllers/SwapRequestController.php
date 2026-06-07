@@ -18,8 +18,9 @@ class SwapRequestController extends Controller
         $personil = $user->personil;
         $canApprove = $user->hasPermissionTo('swap_approve');
 
-        $mySchedules = ($personil && $personil->isPengajar())
-            ? $personil->jadwals()->with(['kelas', 'mapel', 'sesi'])->get()
+        // Semua jadwal (untuk memilih jadwal sendiri ATAU jadwal rekan yang ingin digantikan).
+        $allSchedules = ($personil && $personil->isPengajar())
+            ? Jadwal::with(['personil', 'kelas', 'mapel', 'sesi'])->orderByRaw("FIELD(day,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Ahad')")->orderBy('start_time')->get()
             : collect();
 
         $myRequests = $personil
@@ -28,17 +29,17 @@ class SwapRequestController extends Controller
             : collect();
 
         $pending = $canApprove
-            ? SwapRequest::with(['jadwal.kelas', 'jadwal.mapel', 'requester', 'target'])
+            ? SwapRequest::with(['jadwal.kelas', 'jadwal.mapel', 'jadwal.personil', 'requester', 'target'])
                 ->where('status', 'Diajukan')->latest('id')->get()
             : collect();
 
-        // Daftar pengajar lain sebagai kandidat guru pengganti.
+        // Semua pengajar aktif sebagai kandidat guru pengganti (termasuk diri sendiri,
+        // agar bisa mengajukan diri menggantikan jadwal rekan).
         $teachers = Personil::where('is_active', true)
             ->whereIn('fungsi_kerja', ['Pengajar', 'Dua Fungsi'])
-            ->when($personil, fn ($q) => $q->where('id', '!=', $personil->id))
             ->orderBy('name')->get();
 
-        return view('tukar-jam.index', compact('mySchedules', 'myRequests', 'pending', 'canApprove', 'teachers'));
+        return view('tukar-jam.index', compact('allSchedules', 'myRequests', 'pending', 'canApprove', 'teachers', 'personil'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -51,14 +52,20 @@ class SwapRequestController extends Controller
         $data = $request->validate([
             'jadwal_id' => ['required', 'exists:jadwals,id'],
             'date' => ['required', 'date'],
-            'target_personil_id' => ['nullable', 'exists:personils,id'],
+            'target_personil_id' => ['required', 'exists:personils,id'],
             'reason' => ['required', 'string', 'max:1000'],
         ]);
 
-        // Pastikan jadwal yang ditukar milik pengaju.
-        $jadwal = Jadwal::where('id', $data['jadwal_id'])->where('personil_id', $personil->id)->first();
-        if (! $jadwal) {
-            return back()->with('error', 'Jadwal yang dipilih bukan milik Anda.');
+        $jadwal = Jadwal::find($data['jadwal_id']);
+        $ownerId = $jadwal->personil_id;
+        $substituteId = (int) $data['target_personil_id'];
+
+        // Pengaju harus pemilik jadwal (minta digantikan) ATAU calon pengganti (menawarkan diri).
+        if ($personil->id !== $ownerId && $personil->id !== $substituteId) {
+            return back()->with('error', 'Anda hanya boleh mengajukan untuk jadwal sendiri, atau saat Anda menjadi penggantinya.');
+        }
+        if ($ownerId === $substituteId) {
+            return back()->with('error', 'Guru pengganti tidak boleh sama dengan pengajar asli jadwal tersebut.');
         }
 
         SwapRequest::create($data + [

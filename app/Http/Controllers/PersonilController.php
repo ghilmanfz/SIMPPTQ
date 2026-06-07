@@ -193,6 +193,7 @@ class PersonilController extends Controller
             'salary_base' => ['nullable', 'numeric', 'min:0'],
             'salary_allowance' => ['nullable', 'numeric', 'min:0'],
             'salary_deduction' => ['nullable', 'numeric', 'min:0'],
+            'honor_per_sesi' => ['nullable', 'numeric', 'min:0'],
             'user_id' => ['nullable', 'exists:users,id', Rule::unique('personils', 'user_id')->ignore($personil?->id)],
             'is_active' => ['nullable', 'boolean'],
         ]) + ['is_active' => $request->boolean('is_active')];
